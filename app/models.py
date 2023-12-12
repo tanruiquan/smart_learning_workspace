@@ -1,69 +1,51 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from typing import Dict, List, Optional
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
-ENT_PROP_MAP = {
-    "CARDINAL": "cardinals",
-    "DATE": "dates",
-    "EVENT": "events",
-    "FAC": "facilities",
-    "GPE": "gpes",
-    "LANGUAGE": "languages",
-    "LAW": "laws",
-    "LOC": "locations",
-    "MONEY": "money",
-    "NORP": "norps",
-    "ORDINAL": "ordinals",
-    "ORG": "organizations",
-    "PERCENT": "percentages",
-    "PERSON": "people",
-    "PRODUCT": "products",
-    "QUANTITY": "quanities",
-    "TIME": "times",
-    "WORK_OF_ART": "worksOfArt",
-}
+class QuestionRequest(BaseModel):
+    tags: list[str]
 
 
-class RecordDataRequest(BaseModel):
-    text: str
-    language: str = "en"
+class Question(BaseModel):
+    question_id: int
+    title: str
+    description: str
+    tags: list[str]
 
 
-class RecordRequest(BaseModel):
-    recordId: str
-    data: RecordDataRequest
+class SolutionRequest(BaseModel):
+    question_id: int
 
 
-class RecordsRequest(BaseModel):
-    values: List[RecordRequest]
+class Solution(BaseModel):
+    solution_id: int
+    question_id: int
+    content: str
 
 
-class RecordDataResponse(BaseModel):
-    entities: List
+class AttemptRequest(BaseModel):
+    question_id: int
+    content: str
 
 
-class Message(BaseModel):
-    message: str
+class Attempt(BaseModel):
+    attempt_id: int
+    question_id: int
+    content: str
+    is_correct: bool
+    attempt_datetime: datetime
 
 
-class RecordResponse(BaseModel):
-    recordId: str
-    data: RecordDataResponse
-    errors: Optional[List[Message]]
-    warnings: Optional[List[Message]]
+class FeedbackRequest(BaseModel):
+    attempt_id: int
 
 
-class RecordsResponse(BaseModel):
-    values: List[RecordResponse]
-
-
-class RecordEntitiesByTypeResponse(BaseModel):
-    recordId: str
-    data: Dict[str, List[str]]
-
-
-class RecordsEntitiesByTypeResponse(BaseModel):
-    values: List[RecordEntitiesByTypeResponse]
+class Feedback(BaseModel):
+    feedback_id: int
+    attempt_id: int
+    content: str
+    feedback_datetime: datetime

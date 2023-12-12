@@ -1,36 +1,23 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from collections import defaultdict
 import os
+from collections import defaultdict
 
-from dotenv import load_dotenv, find_dotenv
+import uvicorn
+from dotenv import find_dotenv, load_dotenv
 from fastapi import Body, FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
-import spacy
-import srsly
-import uvicorn
 
-from app.models import (
-    ENT_PROP_MAP,
-    RecordsRequest,
-    RecordsResponse,
-    RecordsEntitiesByTypeResponse,
-)
-from app.spacy_extractor import SpacyExtractor
-
+from app.models import (Attempt, AttemptRequest, Feedback, FeedbackRequest,
+                        Question, QuestionRequest, Solution, SolutionRequest)
 
 app = FastAPI(
-    title="smart learning workspace",
+    title="Smart learning workspace",
     version="1.0",
     description="The backend repository for the smart learning workspace",
 )
-
-example_request = srsly.read_json("app/data/example_request.json")
-
-nlp = spacy.load("en_core_web_sm")
-extractor = SpacyExtractor(nlp)
 
 
 @app.get("/", include_in_schema=False)
@@ -38,50 +25,41 @@ def docs_redirect():
     return RedirectResponse(f"/docs")
 
 
-@app.post("/entities", response_model=RecordsResponse, tags=["NER"])
-async def extract_entities(body: RecordsRequest = Body(..., example=example_request)):
-    """Extract Named Entities from a batch of Records."""
-
-    res = []
-    documents = []
-
-    for val in body.values:
-        documents.append({"id": val.recordId, "text": val.data.text})
-
-    entities_res = extractor.extract_entities(documents)
-
-    res = [
-        {"recordId": er["id"], "data": {"entities": er["entities"]}}
-        for er in entities_res
-    ]
-
-    return {"values": res}
+@app.get("/questions/{question_id}", tags=["Tasks"])
+def read_question(question_id: int) -> Question:
+    return {"question_id": question_id, "title": "Question title", "description": "Question description", "tags": ["tag1", "tag2"]}
 
 
-@app.post(
-    "/entities_by_type", response_model=RecordsEntitiesByTypeResponse, tags=["NER"]
-)
-async def extract_entities_by_type(body: RecordsRequest = Body(..., example=example_request)):
-    """Extract Named Entities from a batch of Records separated by entity label.
-        This route can be used directly as a Cognitive Skill in Azure Search
-        For Documentation on integration with Azure Search, see here:
-        https://docs.microsoft.com/en-us/azure/search/cognitive-search-custom-skill-interface"""
+@app.post("/questions", tags=["Tasks"])
+def create_question(question: QuestionRequest) -> Question:
+    return {"question_id": 1, "title": "Question title", "description": "Question description", "tags": ["tag1", "tag2"]}
 
-    res = []
-    documents = []
 
-    for val in body.values:
-        documents.append({"id": val.recordId, "text": val.data.text})
+@app.get("/solutions/{solution_id}", tags=["Tasks"])
+def read_solution(solution_id: int) -> Solution:
+    return {"solution_id": solution_id, "question_id": 1, "content": "Solution content"}
 
-    entities_res = extractor.extract_entities(documents)
-    res = []
 
-    for er in entities_res:
-        groupby = defaultdict(list)
-        for ent in er["entities"]:
-            ent_prop = ENT_PROP_MAP[ent["label"]]
-            groupby[ent_prop].append(ent["name"])
-        record = {"recordId": er["id"], "data": groupby}
-        res.append(record)
+@app.post("/solutions", tags=["Tasks"])
+def create_solution(solution: SolutionRequest) -> Solution:
+    return {"solution_id": 1, "question_id": 1, "content": "Solution content"}
 
-    return {"values": res}
+
+@app.get("/attempts/{attempt_id}", tags=["Attempts"])
+def read_attempt(attempt_id: int) -> Attempt:
+    return {"attempt_id": attempt_id, "question_id": 1, "content": "Attempt content", "is_correct": True, "attempt_datetime": "2021-01-01T00:00:00Z"}
+
+
+@app.post("/attempts", tags=["Attempts"])
+def create_attempt(attempt: AttemptRequest) -> Attempt:
+    return {"attempt_id": 1, "question_id": 1, "content": "Attempt content", "is_correct": True, "attempt_datetime": "2021-01-01T00:00:00Z"}
+
+
+@app.get("feedback/{feedback_id}", tags=["Feedback"])
+def read_feedback(feedback_id: int) -> Feedback:
+    return {"feedback_id": feedback_id, "attempt_id": 1, "content": "Feedback content", "feedback_datetime": "2021-01-01T00:00:00Z"}
+
+
+@app.post("/feedback", tags=["Feedback"])
+def create_feedback(feedback: FeedbackRequest) -> Feedback:
+    return {"feedback_id": 1, "attempt_id": 1, "content": "Feedback content", "feedback_datetime": "2021-01-01T00:00:00Z"}
