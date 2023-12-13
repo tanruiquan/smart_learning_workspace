@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+import logging
 import os
+import uuid
 from collections import defaultdict
 
 import uvicorn
@@ -12,6 +14,9 @@ from starlette.responses import RedirectResponse
 
 from app.models import (Attempt, AttemptRequest, Feedback, FeedbackRequest,
                         Question, QuestionRequest, Solution, SolutionRequest)
+from app.modules.autochecker import get_submission_details, submit_code
+
+logging.basicConfig(level=logging.DEBUG, filename="app/app.log", filemode="w")
 
 app = FastAPI(
     title="Smart learning workspace",
@@ -52,7 +57,10 @@ def read_attempt(attempt_id: int) -> Attempt:
 
 @app.post("/attempts", tags=["Attempts"])
 def create_attempt(attempt: AttemptRequest) -> Attempt:
-    return {"attempt_id": 1, "question_id": 1, "content": "Attempt content", "is_correct": True, "attempt_datetime": "2021-01-01T00:00:00Z"}
+    response = submit_code(attempt.content)
+    response["attempt_id"] = str(uuid.uuid4())
+    response["question_id"] = attempt.question_id
+    return response
 
 
 @app.get("feedback/{feedback_id}", tags=["Feedback"])
