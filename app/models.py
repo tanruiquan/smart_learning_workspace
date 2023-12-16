@@ -1,63 +1,31 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
+from sqlalchemy.orm import relationship
 
-from datetime import datetime
-
-from pydantic import BaseModel
+from .database import Base
 
 
-class QuestionRequest(BaseModel):
-    tags: list[str]
+class Attempt(Base):
+    __tablename__ = "attempts"
+
+    id = Column(String, primary_key=True, index=True)
+    question_id = Column(String, ForeignKey("questions.id"))
+    stdout = Column(String)
+    time = Column(Float)
+    memory = Column(Integer)
+    stderr = Column(String, nullable=True)
+    token = Column(String)
+    compile_output = Column(String, nullable=True)
+    message = Column(String, nullable=True)
+    status_id = Column(Integer)
+    status_description = Column(String)
+    created_at = Column(DateTime)
+    finished_at = Column(DateTime)
 
 
-class Question(BaseModel):
-    question_id: str
-    title: str
-    description: str
-    tags: list[str]
+class Question(Base):
+    __tablename__ = "questions"
 
-
-class SolutionRequest(BaseModel):
-    question_id: str
-
-
-class Solution(BaseModel):
-    solution_id: str
-    question_id: str
-    content: str
-
-
-class AttemptRequest(BaseModel):
-    question_id: str
-    content: str
-
-
-class AttemptStatus(BaseModel):
-    id: int
-    description: str
-
-
-class Attempt(BaseModel):
-    attempt_id: str
-    question_id: str
-    stdout: str | None
-    time: float
-    memory: int
-    stderr: str | None
-    token: str
-    compile_output: str | None
-    message: str | None
-    status: AttemptStatus
-    created_at: datetime
-    finished_at: datetime
-
-
-class FeedbackRequest(BaseModel):
-    attempt_id: str
-
-
-class Feedback(BaseModel):
-    feedback_id: str
-    attempt_id: str
-    content: str
-    feedback_datetime: datetime
+    id = Column(String, primary_key=True, index=True)
+    title = Column(String)
+    description = Column(String)
+    tags = Column(String)
