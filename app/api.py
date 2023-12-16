@@ -7,14 +7,14 @@ import uuid
 from collections import defaultdict
 
 import uvicorn
-from fastapi import Body, FastAPI, Depends
+from fastapi import Body, Depends, FastAPI
 from sqlalchemy.orm import Session
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
-from .modules.autochecker import get_submission_details, submit_code
-from .database import SessionLocal, engine
 from . import crud, models, schemas
+from .database import SessionLocal, engine
+from .modules.autochecker import get_submission_details, submit_code
 
 logging.basicConfig(level=logging.DEBUG, filename="app/app.log", filemode="w")
 
@@ -41,8 +41,8 @@ def docs_redirect():
 
 
 @app.get("/questions/{question_id}", tags=["Tasks"])
-def read_question(question_id: int) -> schemas.Question:
-    return {"question_id": question_id, "title": "Question title", "description": "Question description", "tags": ["tag1", "tag2"]}
+def read_question(question_id: int, db: Session = Depends(get_db)) -> schemas.Question:
+    return crud.get_question(db, question_id)
 
 
 @app.post("/questions", tags=["Tasks"])
@@ -72,9 +72,8 @@ def create_attempt(attempt: schemas.AttemptRequest, db: Session = Depends(get_db
         "id", "question_id", "stdout", "time", "memory", "stderr", "token", "compile_output", "message", "created_at", "finished_at"]}
     attributes["status_id"] = attempt_details["status"]["id"]
     attributes["status_description"] = attempt_details["status"]["description"]
-    attributes["id"] = str(uuid.uuid4())
     attributes["question_id"] = attempt.question_id
-    return crud.create_attempt(db, schemas.Attempt(**attributes))
+    return crud.create_attempt(db, schemas.AttemptCreate(**attributes))
 
 
 @app.get("feedback/{feedback_id}", tags=["Feedback"])

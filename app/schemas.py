@@ -3,35 +3,59 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class Tag(BaseModel):
+    id: int
+    name: str
+
+
 class QuestionRequest(BaseModel):
     tags: list[str]
 
 
 class Question(BaseModel):
-    question_id: str
+    id: int
     title: str
     description: str
-    tags: list[str]
+    tags: list[Tag]
 
 
 class SolutionRequest(BaseModel):
-    question_id: str
+    question_id: int
 
 
 class Solution(BaseModel):
-    solution_id: str
-    question_id: str
+    solution_id: int
+    question_id: int
     content: str
 
 
 class AttemptRequest(BaseModel):
-    question_id: str
+    question_id: int
     content: str
 
 
+class AttemptBase(BaseModel):
+    question_id: int
+    stdout: str | None
+    time: float
+    memory: int
+    stderr: str | None
+    token: str
+    compile_output: str | None
+    message: str | None
+    status_id: int
+    status_description: str
+    created_at: datetime
+    finished_at: datetime
+
+
+class AttemptCreate(AttemptBase):
+    pass
+
+
 class Attempt(BaseModel):
-    id: str
-    question_id: str
+    id: int
+    question_id: int
     stdout: str | None
     time: float
     memory: int
@@ -49,11 +73,11 @@ class Attempt(BaseModel):
 
 
 class FeedbackRequest(BaseModel):
-    attempt_id: str
+    attempt_id: int
 
 
 class Feedback(BaseModel):
-    feedback_id: str
-    attempt_id: str
+    feedback_id: int
+    attempt_id: int
     content: str
     feedback_datetime: datetime
