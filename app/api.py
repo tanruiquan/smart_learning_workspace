@@ -51,8 +51,8 @@ def create_question(question: schemas.QuestionRequest) -> schemas.Question:
 
 
 @app.get("/solutions/{solution_id}", tags=["Tasks"])
-def read_solution(solution_id: int) -> schemas.Solution:
-    return {"solution_id": solution_id, "question_id": 1, "content": "Solution content"}
+def read_solution(solution_id: int, db: Session = Depends(get_db)) -> schemas.Solution:
+    return crud.get_solution(db, solution_id)
 
 
 @app.post("/solutions", tags=["Tasks"])

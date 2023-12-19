@@ -7,6 +7,10 @@ def get_question(db: Session, question_id: int):
     return db.query(models.Question).filter(models.Question.id == question_id).first()
 
 
+def get_solution(db: Session, solution_id: int):
+    return db.query(models.Solution).filter(models.Solution.id == solution_id).first()
+
+
 def get_attempt(db: Session, attempt_id: int):
     return db.query(models.Attempt).filter(models.Attempt.id == attempt_id).first()
 

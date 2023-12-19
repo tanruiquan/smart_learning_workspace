@@ -24,7 +24,7 @@ class SolutionRequest(BaseModel):
 
 
 class Solution(BaseModel):
-    solution_id: int
+    id: int
     question_id: int
     content: str
 
