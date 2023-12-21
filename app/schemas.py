@@ -1,37 +1,83 @@
 from datetime import datetime
+from enum import Enum
+from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator, Field
+
+# Represents an ObjectId field in the database.
+# It will be represented as a `str` on the model so that it can be serialized to JSON.
+PyObjectId = Annotated[str, BeforeValidator(str)]
+
+
+class TemplateType(str, Enum):
+    mlp = "MLP"
+    rnn = "RNN"
+
+
+class TaskRequest(BaseModel):
+    pass
+
+
+class TaskBase(BaseModel):
+    title: str
+    description: str
+    tags: list[str]
+    template_type: TemplateType
+    solution_params: dict
+    solution_text: str
+
+
+class TaskCreate(TaskBase):
+    pass
+
+
+class Task(TaskBase):
+    id: PyObjectId = Field(..., alias="_id")
 
 
 class QuestionRequest(BaseModel):
     tags: list[str]
 
 
-class Question(BaseModel):
-    question_id: str
+class QuestionBase(BaseModel):
     title: str
     description: str
     tags: list[str]
 
 
-class SolutionRequest(BaseModel):
-    question_id: str
+class QuestionCreate(QuestionBase):
+    pass
 
 
-class Solution(BaseModel):
-    solution_id: str
+class Question(QuestionBase):
+    id: PyObjectId = Field(..., alias="_id")
+
+
+class SolutionBase(BaseModel):
     question_id: str
+    type: TemplateType
+    params: dict
+
+
+class SolutionRequest(SolutionBase):
+    pass
+
+
+class SolutionCreate(SolutionBase):
     content: str
+
+
+class Solution(SolutionBase):
+    id: PyObjectId = Field(..., alias="_id")
 
 
 class AttemptRequest(BaseModel):
-    question_id: str
-    content: str
+    task_id: str
+    text: str
 
 
-class Attempt(BaseModel):
-    id: str
-    question_id: str
+class AttemptBase(BaseModel):
+    task_id: str
     stdout: str | None
     time: float
     memory: int
@@ -44,8 +90,13 @@ class Attempt(BaseModel):
     created_at: datetime
     finished_at: datetime
 
-    class Config:
-        orm_mode = True
+
+class AttemptCreate(AttemptBase):
+    pass
+
+
+class Attempt(AttemptBase):
+    id: PyObjectId = Field(..., alias="_id")
 
 
 class FeedbackRequest(BaseModel):
