@@ -2,17 +2,16 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from app.schemas import Attempt, Task
-
-from .client import Client
+from app.attempts import schemas as attempt_schemas
+from app.tasks import schemas as task_schemas
 
 
 async def get_feedback(db, feedback_id: str):
     return await db['feedbacks'].find_one({"_id": ObjectId(feedback_id)})
 
 
-async def create_feedback(db, task: Task, attempt: Attempt):
-    if attempt.status_description == "Accepted":
+async def create_feedback(db, task: task_schemas.Task, attempt: attempt_schemas.Attempt):
+    if attempt.status.description == "Accepted":
         content = "Great job! Your solution is correct."
     else:
         content = "Your solution is incorrect."

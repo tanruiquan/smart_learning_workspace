@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from enum import Enum
 from io import StringIO
@@ -8,23 +7,23 @@ import requests
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
+
+from app.config import settings
+from app.tasks import schemas as task_schemas
 
 from .templates import TemplateMLP, TemplateRNN
 from .utils import evaluate_model, train_model
-
-load_dotenv()
 
 
 class Language(str, Enum):
     python = 25
 
 
-RAPIDAPI_KEY = os.getenv("JUDGE0_KEY")
-RAPIDAPI_HOST = os.getenv("JUDGE0_HOST")
+RAPIDAPI_KEY = settings.JUDGE0_KEY
+RAPIDAPI_HOST = settings.JUDGE0_HOST
 
-utils_file_path = "app/modules/utils.py"
+utils_file_path = "app/attempts/utils.py"
 
 activation_mapping = {
     "relu": nn.ReLU(),
@@ -32,18 +31,18 @@ activation_mapping = {
 
 
 class AutoChecker():
-    def __init__(self, task: dict, attempt_text: str):
-        self.params = task['solution_params']
+    def __init__(self, task: task_schemas.Task, attempt_text: str):
+        self.params = task.solution_params
         self.attempt_text = attempt_text
         logging.info(f"Task: {task}")
 
-        if "activation" in task["solution_params"]:
-            task["solution_params"]["activation"] = activation_mapping[task["solution_params"]["activation"]]
+        if "activation" in task.solution_params:
+            task.solution_params["activation"] = activation_mapping[task.solution_params["activation"]]
 
-        if task["template_type"] == 'MLP':
-            self.solution = TemplateMLP(**task['solution_params'])
-        elif task["template_type"] == 'RNN':
-            self.solution = TemplateRNN(**task['solution_params'])
+        if task.template_type == 'MLP':
+            self.solution = TemplateMLP(**task.solution_params)
+        elif task.template_type == 'RNN':
+            self.solution = TemplateRNN(**task.solution_params)
         else:
             raise Exception('Invalid solution type')
 

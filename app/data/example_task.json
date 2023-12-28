@@ -1,0 +1,23 @@
+{
+  "title": "Movie Review Sentiment Classification",
+  "description": "## Movie Review Sentiment Classification\n\n### Goal\n\nIn this task, learners will practice implementing a Multi-Layer Perceptron (MLP) for the task of movie review classification.\n\n### Objectives\n\n- Layer Definition: Define the architecture of the neural network by specifying the parameters for each fully connected layer, activation functions, and the output layer.\n\n - Activation Functions: Understand the role of activation functions (ReLU in this case) in introducing non-linearity to the model.\n\n- Softmax Activation for Classification: Recognize the use of the softmax activation function in the output layer for obtaining probability scores, particularly in multi-class classification problems.\n\n- Forward Pass: Understand the forward pass through the layers of the neural network, where input data is processed to produce output log probabilities.\n\n### Data\n\nThe features are textual content of movie reviews and the class labels are either negative or positive. Assume the dataset consists of 10,662 reviews, the features are vectorized, the negative and positive labels are mapped to 0 and 1 respectively. In other words, the data processing is done for you.\n\n### Learner Instructions\n\n**Step 1: Define the Neural Network Class**\nThe skeleton of the neural network class has been given to you. However, to make the model more flexible, add `vocab_size` as an input parameter to the `__init__()` method.\n\n**Step 2: Define the First Fully Connected Layer**\nIn the `__init()__` method, define the first fully connected layer (fc1) with an input size of `vocab_size` and an output size of 4. Then, define a ReLU activation (relu1) to introduce non-linearity.\n\n**Step 3: Define the Second Fully Connected Layer** \nIn the `__init()__` method, define the second fully connected layer (fc2) with an input size of 4 and an output size of 3. Again, define another ReLU activation (relu2).\n\n**Step 4: Define the Third Fully Connected Layer**\nIn the `__init()__` method, define the third fully connected layer (fc3) with an input size of 3 and an output size of 3. Again, a ReLU activation (relu3) follows.\n\n**Step 5: Define the Output Layer**\nIn the `__init()__` method, define the output layer (out) with an input size of 3 and an output size of 2. This layer represents the final prediction.\n\n**Step 6: Define the Log Softmax Layer**\nFinally, in the `__init__()` method, define the log softmax layer, which is applied to the output for obtaining log probabilities.\n\n**Step 7: Define the Forward Pass**\nIn the `forward()` method, add `X` as an input parameter. Then, specifies how input `X` passes through the layers to produce output log probabilities.\n\n**Step 8:**\nInstantiate the model, assuming the vocab size of the dataset is 100.\n",
+  "tags": [
+    "text",
+    "classification",
+    "sentiment analysis"
+  ],
+  "template_type": "MLP",
+  "solution_params": {
+    "input_size": 100,
+    "output_size": 2,
+    "hidden_sizes": [
+      4,
+      3,
+      3
+    ],
+    "activation": "relu",
+    "dropout": 0.0,
+    "batch_norm": false
+  },
+  "solution_text": "class Solution(nn.Module):\n    \n    def __init__(self, vocab_size):\n        super().__init__()\n        self.vocab_size = vocab_size\n        # Define 1st fully connected (i.e., linear) hidden layer\n        self.fc1 = nn.Linear(self.vocab_size, 4)\n        self.relu1 = nn.ReLU()\n        # Define 2st fully connected (i.e., linear) hidden layer\n        self.fc2 = nn.Linear(4, 3)\n        self.relu2 = nn.ReLU()\n        # Define 3st fully connected (i.e., linear) hidden layer\n        self.fc3 = nn.Linear(3, 3)\n        self.relu3 = nn.ReLU()\n        # Define output layer (which is also a linear layer)\n        self.out = nn.Linear(3, 2)        \n        # Define log softmax layer\n        self.log_softmax = nn.LogSoftmax(dim=1)\n        \n    def forward(self, X):\n        out = self.fc1(X)\n        out = self.relu1(out)\n        out = self.fc2(out)\n        out = self.relu2(out)\n        out = self.fc3(out)\n        out = self.relu3(out)\n        out = self.out(out)\n        log_probs = self.log_softmax(out)\n        return log_probs\n\nmodel = Solution(vocab_size=100)"
+}
