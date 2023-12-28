@@ -4,7 +4,6 @@
 import logging
 
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
 from app.attempts.router import router as attempt_router
@@ -26,4 +25,4 @@ app.include_router(feedback_router)
 
 @app.get("/", include_in_schema=False)
 def docs_redirect():
-    return RedirectResponse(f"/docs")
+    return RedirectResponse("/docs")
