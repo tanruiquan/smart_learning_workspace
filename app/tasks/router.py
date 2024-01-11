@@ -11,6 +11,11 @@ router = APIRouter(
 )
 
 
+@router.get("", response_model_by_alias=False)
+async def read_tasks(db=Depends(get_db)) -> list[schemas.Task]:
+    return await service.get_tasks(db)
+
+
 @router.get("/{task_id}", response_model_by_alias=False)
 async def read_task(task_id: str, db=Depends(get_db)) -> schemas.Task:
     if (task := await service.get_task(db, task_id)) is None:

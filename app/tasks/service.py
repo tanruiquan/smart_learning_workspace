@@ -8,6 +8,10 @@ async def get_task(db, task_id: str):
     return await db['tasks'].find_one({"_id": ObjectId(task_id)})
 
 
+async def get_tasks(db):
+    return await db['tasks'].find().to_list(length=100)
+
+
 async def create_task(db, task: schemas.TaskCreate):
     import json
 

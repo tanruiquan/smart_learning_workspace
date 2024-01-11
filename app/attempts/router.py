@@ -22,9 +22,18 @@ async def read_attempt(attempt_id: str, db=Depends(get_db)) -> schemas.Attempt:
 
 
 @router.post("", response_model_by_alias=False)
-async def create_attempt(attempt: schemas.AttemptRequest, db=Depends(get_db), is_correct: bool = True) -> schemas.Attempt:
+async def create_attempt(attempt: schemas.AttemptRequest, db=Depends(get_db)) -> schemas.Attempt:
     if (task := await task_service.get_task(db, attempt.task_id)) is None:
         raise HTTPException(
             status_code=404, detail=f"Unable to create attempt. Task {attempt.task_id} not found")
     task = task_schemas.Task(**task)
-    return await service.create_correct_attempt(db, task, attempt) if is_correct else await service.create_attempt(db, task, attempt)
+    return await service.create_attempt(db, task, attempt)
+
+
+@router.post("/test", response_model_by_alias=False)
+async def test_create_attempt(task_id: str, is_correct: bool, db=Depends(get_db)) -> schemas.Attempt:
+    if (task := await task_service.get_task(db, task_id)) is None:
+        raise HTTPException(
+            status_code=404, detail=f"Unable to create attempt. Task {task_id} not found")
+    task = task_schemas.Task(**task)
+    return await service.create_correct_attempt(db, task) if is_correct else await service.create_wrong_attempt(db, task)
