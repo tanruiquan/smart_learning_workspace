@@ -1,8 +1,5 @@
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
 
 torch.manual_seed(42)
 

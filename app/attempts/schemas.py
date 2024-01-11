@@ -5,11 +5,6 @@ from pydantic import BaseModel, Field
 from app.schemas import PyObjectId
 
 
-class AttemptRequest(BaseModel):
-    task_id: str
-    text: str
-
-
 class Status(BaseModel):
     id: int
     description: str
@@ -17,6 +12,16 @@ class Status(BaseModel):
 
 class AttemptBase(BaseModel):
     task_id: str
+    text: str
+
+
+class AttemptRequest(AttemptBase):
+    pass
+
+
+class Attempt(AttemptBase):
+    id: PyObjectId = Field(..., alias="_id")
+    source_code: str
     stdout: str | None
     time: float
     memory: int
@@ -27,11 +32,3 @@ class AttemptBase(BaseModel):
     status: Status
     created_at: datetime
     finished_at: datetime
-
-
-class AttemptCreate(AttemptBase):
-    pass
-
-
-class Attempt(AttemptBase):
-    id: PyObjectId = Field(..., alias="_id")
